@@ -137,7 +137,15 @@ public class AnswerCanvasUI : MonoBehaviour
             //加载题库
             topic.ReadTopics();
             //设置题库
-            topic.SetTopics();
+            try
+            {
+                topic.SetTopics(topic.topicNO[0]);
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                Debug.LogError(e);
+                throw (e);
+            }
         }
     }
 }

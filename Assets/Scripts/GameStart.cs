@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using System.IO;
 using System;
 
 public class GameStart : MonoBehaviour
@@ -40,6 +41,8 @@ public class GameStart : MonoBehaviour
         manager = GameObject.Find("CanvasManager").GetComponent<CanvasManager>();
 
         vedio = startGameCanvas.transform.Find("StartVedio").GetComponent<VideoPlayer>();
+
+        InitIntegral();
     }
 
     void Update()
@@ -62,5 +65,14 @@ public class GameStart : MonoBehaviour
     {
         manager.Push(mainCanvas);
         mainCanvas.GetComponent<Animator>().SetBool("Player", true);
+    }
+
+    /// <summary>
+    /// 加载以前游戏记录的分数
+    /// </summary>
+    void InitIntegral()
+    {
+        string path = Application.streamingAssetsPath + ConstLib.INTEGRAL_FILE_PATH;
+        ConstLib.Integral = Convert.ToInt32(File.ReadAllText(path));
     }
 }

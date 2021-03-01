@@ -41,18 +41,41 @@ public class TopicLib : MonoBehaviour
     Slider countDownBar;
   
     Canvas faillCanvas;
+    Canvas vectoryCanvas;
 
     JArray topicArr = new JArray();
 
     int topicIndex = 0;
 
-    //要求分数
-    public int requstGrade = 2;
-    //当前分数
-    int currentGrade = 0;
+    /// <summary>
+    /// 总题数，由加载的json文件计算得出
+    /// </summary>
+    int totalQuestions = 0;
+    /// <summary>
+    /// 要求答对的题数，由当前关卡与总题数计算得出
+    /// </summary>
+    int requstQuestions = 0;
+    /// <summary>
+    /// 当前已答题数
+    /// </summary>
+    int currentQuestions = 0;
+    /// <summary>
+    /// 要求答对题数对总题数的占比
+    /// </summary>
+    public float integralProportion = 0.5f;
+    /// <summary>
+    /// 获取积分的初始值
+    /// </summary>
+    public int initIntegral = 20;
+    
+    float requstProportion = 0.9f; 
+    /// <summary>
+    /// 存储题号的列表
+    /// </summary>
+    public List<int> topicNO = new List<int>();
 
     void Start()
-    {
+    {       
         kownHowMuchCanvas = GameObject.Find("KownHowMuchCanvas").GetComponent<Canvas>();
         answerCanvas = kownHowMuchCanvas.transform.Find("AnswerCanvas").GetComponent<Canvas>();
         countDownBar = kownHowMuchCanvas.transform.Find("CountDownBar").GetComponent<Slider>();
@@ -96,9 +119,9 @@ public class TopicLib : MonoBehaviour
         if (answerCanvas.enabled == false)
         {
             topicIndex = 0;
-            currentGrade = 0;
+            currentQuestions = 0;
         }
-        if (faillCanvas == null && countDownBar.value <= countDownBar.minValue && currentGrade < requstGrade)
+        if (faillCanvas == null && vectoryCanvas == null && countDownBar.value <= countDownBar.minValue && currentQuestions < requstQuestions)
         {
             //弹出失败界面
             faillCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.FAILLCANVAS_PATH), kownHowMuchCanvas.transform);
@@ -106,40 +129,47 @@ public class TopicLib : MonoBehaviour
     }
 
     public void Click()
-    {       
+    {
         //遍历所有答案，判断当前勾选答案是否为正确答案
-        if (topicIndex < topicArr.Count)
+        if (topicIndex < topicNO.Count)
         {
             foreach (Toggle toggle in toggles)
             {
                 if (toggle.isOn == true)
                 {
-                    if (toggle.tag == Convert.ToString(topicArr[topicIndex][RIGHTANSWER])
+                    Debug.LogWarning(toggle.tag+","+ Convert.ToString(topicArr[topicNO[topicIndex]][RIGHTANSWER]));
+                    if (toggle.tag == Convert.ToString(topicArr[topicNO[topicIndex]][RIGHTANSWER])
                         && countDownBar.value > countDownBar.minValue)
                     {
                         //计分
-                        currentGrade++;
+                        currentQuestions++;
                     }
                 }
             }
 
-
             //如果时间未结束，平且分数达到要求值，就弹出胜利框
-            if (countDownBar.value > countDownBar.minValue && currentGrade >= requstGrade)
+            if (countDownBar.value > countDownBar.minValue && currentQuestions >= requstQuestions)
             {
-                Instantiate(Resources.Load<Canvas>(ConstLib.VECTORYCANVASP_PATH), kownHowMuchCanvas.transform);
+                if (requstProportion >= 1f)
+                {
+                    vectoryCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.VECTORYCANVASP_PATH), kownHowMuchCanvas.transform);
+                }
+                
+                NextLevel();
+                return;
             }
 
             topicIndex++;
         }
+        Debug.Log(topicIndex+","+ topicNO.Count+","+ currentQuestions+","+ requstProportion);
 
         //在题库中至少有两个题时才激活下一题切换
-        if (topicIndex < topicArr.Count)
+        if (topicIndex < topicNO.Count)
         {
-            SetTopics(topicIndex);
+            SetTopics(topicNO[topicIndex]);
         }
-    }
 
+    }
     /// <summary>
     /// 从json文件中读取题库到内存
     /// </summary>
@@ -155,6 +185,8 @@ public class TopicLib : MonoBehaviour
 
         //将题库拆解到数组中存储
         topicArr = JArray.Parse(obj[TOPICS].ToString());
+  
+        GetTopics();        
     }
 
     /// <summary>
@@ -177,5 +209,40 @@ public class TopicLib : MonoBehaviour
         answerB.text = Convert.ToString(answer[ANSWERS][B]);
         answerC.text = Convert.ToString(answer[ANSWERS][C]);
         answerD.text = Convert.ToString(answer[ANSWERS][D]);
+    }
+
+    void GetTopics()
+    {
+        topicNO.Clear();
+        totalQuestions = topicArr.Count;
+        requstQuestions = (int)(totalQuestions * requstProportion);
+        int i = 0;
+
+        while (i < requstQuestions)
+        {
+            int no = UnityEngine.Random.Range(0, totalQuestions);
+            if (!topicNO.Contains(no))
+            {
+                topicNO.Add(no);
+                i++;
+            }
+        }
+    }
+
+    void NextLevel()
+    {
+        currentQuestions = 0;
+        countDownBar.value = countDownBar.maxValue;
+        topicIndex = 0;
+        requstProportion += 0.05f;
+        GetTopics();
+        SetTopics(topicNO[0]);
+
+        Text txt = Instantiate(Resources.Load<Text>(ConstLib.INTEGRAL_PATH), kownHowMuchCanvas.transform);
+
+        txt.text = Convert.ToString(initIntegral);
+
+        ConstLib.Integral += initIntegral;
+        ConstLib.WriteIntegral();
     }
 }
