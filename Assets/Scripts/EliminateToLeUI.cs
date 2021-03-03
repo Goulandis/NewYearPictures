@@ -83,21 +83,13 @@ public class EliminateToLeUI : MonoBehaviour
     void Update()
     {
         if (eliminateToLeCanvas.enabled == false && eliminateToLeCanvas.transform.childCount > 0)
-        {  
-            foreach (Transform child in eliminateToLeCanvas.transform)
-            {
-                if (child.gameObject.name != newYearPic.name && child.gameObject.name != countDownBar.name)
-                {
-                    DestroyImmediate(child.gameObject);
-                    blocks.Clear();
-                    inPicBlocks.Clear();
-                }
-            }
-            hasClearArea = false;
+        {
+            Clear();
         }
         if (faillCanvas == null && hasClearArea == false && countDownBar.value <= countDownBar.minValue)
         {
-            faillCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.FAILLCANVAS_PATH), eliminateToLeCanvas.transform);
+            //faillCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.PREFAB_FAILLCANVAS), eliminateToLeCanvas.transform);
+            faillCanvas = ToolLib.EndTig(false, eliminateToLeCanvas.transform);
         }
     }
 
@@ -129,6 +121,7 @@ public class EliminateToLeUI : MonoBehaviour
                 Block blockTmp = Instantiate(blockPrefab, eliminateToLeCanvas.transform);
 
                 blockTmp.GetComponent<BlockScript>().ClearCrossArea = ClearCrossArea;
+                blockTmp.GetComponent<BlockScript>().BoomProps = BoomBlocks;
 
                 blockTmp.transform.position = new Vector3(initX,initY, 0);
                 blockTmp.GetComponent<BlockScript>().SetIndex(row, col);
@@ -240,7 +233,8 @@ public class EliminateToLeUI : MonoBehaviour
         //每次消除十字区域的色块时检查一遍年画内的色块是否已消除完毕
         if (hasClearArea == true && countDownBar.value > countDownBar.minValue)
         {
-            Instantiate(Resources.Load(ConstLib.VECTORYCANVASP_PATH), eliminateToLeCanvas.transform);
+            //Instantiate(Resources.Load(ConstLib.PREFAB_VECTORYCANVASP), eliminateToLeCanvas.transform);
+            NextLevel();
         }
     }
 
@@ -303,5 +297,125 @@ public class EliminateToLeUI : MonoBehaviour
             }
         }
         return showAll;
+    }
+
+    /// <summary>
+    /// 炸弹道具
+    /// </summary>
+    /// <param name="rowIndex"></param>
+    /// <param name="colIndex"></param>
+    public void BoomBlocks(int rowIndex, int colIndex)
+    {
+        //爆炸区域在左下角边界
+        if (rowIndex - 1 <= 0 && colIndex - 1 <= 0)
+        {
+            blocks[rowIndex][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+        }
+        //爆炸区域在左边界
+        else if (rowIndex - 1 > 0 && rowIndex + 1 < rowBlockNum && colIndex - 1 <= 0)
+        {
+            blocks[rowIndex][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+        }
+        //爆炸区域在左上角边界
+        else if (rowIndex + 1 >= rowBlockNum && colIndex - 1 <= 0)
+        {
+            blocks[rowIndex][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+        }
+        //爆炸区域在上边界
+        else if (rowIndex + 1 >= rowBlockNum && colIndex - 1 > 0 && colIndex + 1 < colBlockNum)
+        {
+            blocks[rowIndex][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+        }
+        //爆炸区域在右上角边界
+        else if (rowIndex + 1 >= rowBlockNum && colIndex + 1 >= colBlockNum)
+        {
+            blocks[rowIndex][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+        }
+        //爆炸区域在右边界
+        else if (rowIndex - 1 > 0 && rowIndex + 1 < rowBlockNum && colIndex + 1 >= colBlockNum)
+        {
+            blocks[rowIndex][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+        }
+        //爆炸区域在右下角边界
+        else if (rowIndex - 1 <= 0 && colIndex + 1 >= colBlockNum)
+        {
+            blocks[rowIndex][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+        }
+        //爆炸区域在下边界
+        else if (rowIndex - 1 <= 0 & colIndex - 1 > 0 && colIndex + 1 < colBlockNum)
+        {
+            blocks[rowIndex][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+        }
+        //爆炸区域在中间区域
+        else
+        {
+            blocks[rowIndex][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex + 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex - 1][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+            blocks[rowIndex + 1][colIndex - 1].GetComponent<Image>().color = blockScript.colors[0];
+        }
+    }
+
+    void Clear()
+    {
+        foreach (Transform child in eliminateToLeCanvas.transform)
+        {
+            if (child.gameObject.name != newYearPic.name && child.gameObject.name != countDownBar.name)
+            {
+                DestroyImmediate(child.gameObject);
+                blocks.Clear();
+                inPicBlocks.Clear();
+            }
+        }
+        hasClearArea = false;       
+    }
+
+    void NextLevel()
+    {
+        Clear();
+        InitCanvas();
+        InitNewYearPic();
+
+        ToolLib.Tig(eliminateToLeCanvas.transform, ConstLib.EliminateToLeIntegral.ToString());
+
+        ConstLib.Integral += ConstLib.EliminateToLeIntegral;
+        ConstLib.WriteIntegral();
     }
 }

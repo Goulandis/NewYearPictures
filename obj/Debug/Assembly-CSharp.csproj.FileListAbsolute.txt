@@ -240,3 +240,7 @@ D:\Codes\Unity\NewYearPictures\obj\Debug\Assembly-CSharp.csproj.CoreCompileInput
 D:\Codes\Unity\NewYearPictures\obj\Debug\Assembly-CSharp.csproj.CopyComplete
 D:\Codes\Unity\NewYearPictures\obj\Debug\Assembly-CSharp.dll
 D:\Codes\Unity\NewYearPictures\obj\Debug\Assembly-CSharp.pdb
+D:\Git\NewYearPictures\obj\Debug\Assembly-CSharp.csprojAssemblyReference.cache
+D:\Git\NewYearPictures\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache
+D:\Git\NewYearPictures\obj\Debug\Assembly-CSharp.dll
+D:\Git\NewYearPictures\obj\Debug\Assembly-CSharp.pdb

@@ -44,8 +44,8 @@ public class BubbleQueue
     public BubbleWay[] queue = new BubbleWay[len];
 
     //BubbleWay zeroBubble;
-    int ptr = 0;
-    int refPtr = 0;
+    public int ptr = 0;
+    public int refPtr = 0;
 
     public Action ShowPic;
 
@@ -126,7 +126,6 @@ public class BubbleQueue
             {
                 for (int j = i; j > 0; j--)
                 {
-                    Debug.Log("j:" + (j - 1) + "--" + queue[j - 1].RefBubble.sprite);
                     queue[j].RefBubble = queue[j-1].RefBubble;                   
                 }
             }
@@ -173,26 +172,28 @@ public class FishingToLeUI : MonoBehaviour
     float rightfloat;
     float upfloat;
     Vector2 dis;
+    Color picColor;
 
     //泡泡出现的几率，越小几率越高
-    public int probability = 9;
+    public int probability = 7;
     public float interval = 3f;
 
     Bubble bullet;
 
     void Start()
     {
-        fishingToLeCanvas = GameObject.Find("FishingToLeCanvas").GetComponent<Canvas>();
+        fishingToLeCanvas = GameObject.Find(ConstLib.FISHINGTOLECANVAS).GetComponent<Canvas>();
 
         pathWay = fishingToLeCanvas.transform.Find("PathWay").GetComponent<RectTransform>();
         bubbleWay = fishingToLeCanvas.transform.Find("BubbleWay").GetComponent<RectTransform>();
         bubbleQueue = fishingToLeCanvas.transform.Find("BubbleQueue").GetComponent<RectTransform>();
         pic = fishingToLeCanvas.transform.Find("Pic").GetComponent<Image>();
+        picColor = pic.transform.Find(ConstLib.MASK1).GetComponent<Image>().color;
         fisher = fishingToLeCanvas.transform.Find("Fisher").GetComponent<Image>();
         lookAtPoint = fishingToLeCanvas.transform.Find("LookAtPoint").GetComponent<Image>();
         countDownBar = fishingToLeCanvas.transform.Find("CountDownBar").GetComponent<Slider>();
         initBullet = fisher.transform.Find("InitBullet").GetComponent<Image>();
-        manager = GameObject.Find("CanvasManager").GetComponent<CanvasManager>();
+        manager = GameObject.Find(ConstLib.CANVASMANAGER).GetComponent<CanvasManager>();
 
         initBullet.sprite = manager.GetComponent<UIResource>().RandomBubbleSprite();
         queue.ShowPic = ShowPic;
@@ -220,10 +221,7 @@ public class FishingToLeUI : MonoBehaviour
         }
         if(fishingToLeCanvas.enabled == false && bubbleQueue.childCount > 0)
         {
-            foreach (Transform child in bubbleQueue)
-            {
-                DestroyImmediate(child.gameObject);
-            }
+            Clear();
         }
         if (randomSprite)
         {
@@ -232,7 +230,8 @@ public class FishingToLeUI : MonoBehaviour
         }
         if (faillCanvas == null && showedNum < pic.transform.childCount && countDownBar.value <= countDownBar.minValue)
         {
-            faillCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.FAILLCANVAS_PATH), fishingToLeCanvas.transform);
+            //faillCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.PREFAB_FAILLCANVAS), fishingToLeCanvas.transform);
+            faillCanvas = ToolLib.EndTig(false, fishingToLeCanvas.transform);
         }
     }
 
@@ -277,13 +276,17 @@ public class FishingToLeUI : MonoBehaviour
     /// </summary>
     void FisherRotate()
     {
-        //屏幕坐标转换为本地坐标
+        ////屏幕坐标转换为本地坐标
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             fishingToLeCanvas.GetComponent<RectTransform>(),
             Input.mousePosition, fishingToLeCanvas.worldCamera,
             out pos);
 
         dis = lookAtPoint.GetComponent<RectTransform>().anchoredPosition = pos;
+
+        //dis = lookAtPoint.GetComponent<RectTransform>().anchoredPosition = Input.mousePosition;
+
+        //fisher.transform.LookAt(new Vector3(Input.mousePosition.x,Input.mousePosition.y,0));
 
         rightfloat = Vector2.Angle(dis, Vector2.right);
         upfloat = Vector2.Angle(dis, Vector2.up);
@@ -320,7 +323,9 @@ public class FishingToLeUI : MonoBehaviour
         {
             if (showedNum >= pic.transform.childCount && countDownBar.value >= countDownBar.minValue && vectoryCanvas == null)
             {
-                vectoryCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.VECTORYCANVASP_PATH), fishingToLeCanvas.transform);
+                //vectoryCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.PREFAB_VECTORYCANVASP), fishingToLeCanvas.transform);
+                //vectoryCanvas = ToolLib.EndTig(true, fishingToLeCanvas.transform);
+                NextLevel();
             }
             Image img = mask.gameObject.GetComponent<Image>();
             if (img.color.a != 0)
@@ -330,5 +335,42 @@ public class FishingToLeUI : MonoBehaviour
                 return;
             }
         }
+    }
+
+    void NextLevel()
+    {
+        ConstLib.Integral += ConstLib.FishingToLeIntegral;
+        ConstLib.WriteIntegral();
+        InitShowPic();
+        countDownBar.value += ConstLib.FishingToLeTimeAddInterval;
+        showedNum = 0;
+        foreach (Transform mask in pic.transform)
+        {           
+            Image img = mask.gameObject.GetComponent<Image>();
+            if (img.color.a == 0)
+            {
+                img.color = picColor;
+            }
+        }
+    }
+
+    void Clear()
+    {
+        foreach (Transform mask in pic.transform)
+        {
+            Image img = mask.gameObject.GetComponent<Image>();
+            if (img.color.a == 0)
+            {
+                img.color = picColor;
+            }
+        }
+        foreach (Transform child in bubbleQueue)
+        {
+            Destroy(child.gameObject);
+        }
+
+        queue.ptr = 0;
+        queue.refPtr = 0;
+        showedNum = 0;
     }
 }

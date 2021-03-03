@@ -14,6 +14,9 @@ public class CanvasManager : MonoBehaviour
     Canvas eliminateToLeCanvas;
     Canvas fishingToLeCanvas;
     Canvas emigratedCanvas;
+    Canvas stateCanvas;
+    Canvas stateCanvasClone;
+
 
     //存储UI界面的栈
     Stack<Canvas> UIStack = new Stack<Canvas>();
@@ -27,31 +30,33 @@ public class CanvasManager : MonoBehaviour
     {
         try
         {
-            startGameCanvas = GameObject.Find("StartGameCanvas").GetComponent<Canvas>();
+            startGameCanvas = GameObject.Find(ConstLib.STARTGAMECANVAS).GetComponent<Canvas>();
             startGameCanvas.enabled = true;
 
-            mainCanvas = GameObject.Find("MainCanvas").GetComponent<Canvas>();
+            mainCanvas = GameObject.Find(ConstLib.MAINCANVAS).GetComponent<Canvas>();
             mainCanvas.enabled = false;
 
-            eliminateToLeCanvas = GameObject.Find("EliminateToLeCanvas").GetComponent<Canvas>();
+            eliminateToLeCanvas = GameObject.Find(ConstLib.ELIMINATETOLECANVAS).GetComponent<Canvas>();
             eliminateToLeCanvas.enabled = false;
 
-            kownHowMuchCanvas = GameObject.Find("KownHowMuchCanvas").GetComponent<Canvas>();
+            kownHowMuchCanvas = GameObject.Find(ConstLib.KOWNHOWMUCHCANVAS).GetComponent<Canvas>();
             kownHowMuchCanvas.enabled = false;
 
-            fishingToLeCanvas = GameObject.Find("FishingToLeCanvas").GetComponent<Canvas>();
+            fishingToLeCanvas = GameObject.Find(ConstLib.FISHINGTOLECANVAS).GetComponent<Canvas>();
             fishingToLeCanvas.enabled = false;
 
-            emigratedCanvas = GameObject.Find("EmigratedCanvas").GetComponent<Canvas>();
+            emigratedCanvas = GameObject.Find(ConstLib.ABOUTCANVAS).GetComponent<Canvas>();
             emigratedCanvas.enabled = false;
 
-            canvasManager = GameObject.Find("CanvasManager");
+            canvasManager = GameObject.Find(ConstLib.CANVASMANAGER);
 
-            kownHowMuchUI = mainCanvas.transform.Find("BtnKownHowMuch").GetComponent<AnswerCanvasUI>();
+            kownHowMuchUI = mainCanvas.transform.Find(ConstLib.BTNKOWNHOWMUCH).GetComponent<AnswerCanvasUI>();
 
-            gameStart = startGameCanvas.transform.Find("BtnStartGame").GetComponent<GameStart>();
+            gameStart = startGameCanvas.transform.Find(ConstLib.BTNSTARTGAME).GetComponent<GameStart>();
 
             Push(startGameCanvas);
+
+            stateCanvas = Resources.Load<Canvas>(ConstLib.PREFAB_STATECANVAS);
         }
         catch (ArgumentNullException e)
         {
@@ -65,7 +70,56 @@ public class CanvasManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Pop();
-        }      
+        }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            if (stateCanvasClone == null)
+            {               
+                stateCanvasClone = Instantiate(stateCanvas);
+                stateCanvasClone.GetComponent<StateCanvasScript>().InitState();
+            }           
+        }
+        if (Input.GetKeyUp(KeyCode.Q))
+        {
+            if (stateCanvasClone != null)
+            {
+                Destroy(stateCanvasClone.gameObject);
+            }           
+        }
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            if (PlayerState.prop.BoomNum > 0)
+            {
+                if (PlayerState.usingBoom == false)
+                {
+                    PlayerState.usingBoom = true;
+                    ToolLib.Tig(UIStack.Peek().transform, "炸弹已激活");
+                }
+            }
+            else
+            {
+                ToolLib.Tig(UIStack.Peek().transform, "炸弹已用完");
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            Canvas canvas = UIStack.Peek();
+            if (ConstLib.GAMECANVAS.Contains(canvas.name))
+            {
+                PlayerState.usingTimeAdd = true;
+            }            
+            if (PlayerState.usingTimeAdd == true)
+            {
+                if (canvas.transform.Find(ConstLib.COUNDOWNBAR) != null)
+                {
+                    canvas.transform.Find(ConstLib.COUNDOWNBAR).GetComponent<Timer>().TimerAdd();
+                }
+                else if (canvas.name == ConstLib.ANSWERCANVAS)
+                {
+                    canvas.transform.parent.transform.Find(ConstLib.COUNDOWNBAR).GetComponent<Timer>().TimerAdd();
+                }
+            }
+        }
     }
 
     /// <summary>

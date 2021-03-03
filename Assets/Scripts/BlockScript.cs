@@ -12,6 +12,8 @@ public class BlockScript : MonoBehaviour
     public List<Color> colors;
     public delegate void Clicked(int rowIndex,int colIndex);
     public Clicked ClearCrossArea;
+    public delegate void BoomUtil(int rowIndex, int colIndex);
+    public BoomUtil BoomProps;
 
     public int rowIndex;
     public int colIndex;
@@ -26,7 +28,20 @@ public class BlockScript : MonoBehaviour
     {
         if (this.GetComponent<Image>().color == colors[0])
         {
-            ClearCrossArea(rowIndex,colIndex);
+            if (PlayerState.usingBoom == false)
+            {
+                ClearCrossArea(rowIndex, colIndex);
+            }
+            else
+            {
+                if (PlayerState.prop.BoomNum > 0)
+                {
+                    BoomProps(rowIndex, colIndex);
+                    PlayerState.usingBoom = false;
+                    PlayerState.prop.BoomNum--;
+                    PlayerState.SetBoomNum();
+                }               
+            }
         }
     }
 }

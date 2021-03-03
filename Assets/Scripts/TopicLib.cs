@@ -63,10 +63,6 @@ public class TopicLib : MonoBehaviour
     /// 要求答对题数对总题数的占比
     /// </summary>
     public float integralProportion = 0.5f;
-    /// <summary>
-    /// 获取积分的初始值
-    /// </summary>
-    public int initIntegral = 20;
     
     float requstProportion = 0.9f; 
     /// <summary>
@@ -124,7 +120,8 @@ public class TopicLib : MonoBehaviour
         if (faillCanvas == null && vectoryCanvas == null && countDownBar.value <= countDownBar.minValue && currentQuestions < requstQuestions)
         {
             //弹出失败界面
-            faillCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.FAILLCANVAS_PATH), kownHowMuchCanvas.transform);
+            //faillCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.PREFAB_FAILLCANVAS), kownHowMuchCanvas.transform);
+            faillCanvas = ToolLib.EndTig(false, kownHowMuchCanvas.transform);
         }
     }
 
@@ -137,7 +134,6 @@ public class TopicLib : MonoBehaviour
             {
                 if (toggle.isOn == true)
                 {
-                    Debug.LogWarning(toggle.tag+","+ Convert.ToString(topicArr[topicNO[topicIndex]][RIGHTANSWER]));
                     if (toggle.tag == Convert.ToString(topicArr[topicNO[topicIndex]][RIGHTANSWER])
                         && countDownBar.value > countDownBar.minValue)
                     {
@@ -152,7 +148,8 @@ public class TopicLib : MonoBehaviour
             {
                 if (requstProportion >= 1f)
                 {
-                    vectoryCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.VECTORYCANVASP_PATH), kownHowMuchCanvas.transform);
+                    //vectoryCanvas = Instantiate(Resources.Load<Canvas>(ConstLib.PREFAB_VECTORYCANVASP), kownHowMuchCanvas.transform);
+                    vectoryCanvas = ToolLib.EndTig(true, kownHowMuchCanvas.transform);
                 }
                 
                 NextLevel();
@@ -161,7 +158,6 @@ public class TopicLib : MonoBehaviour
 
             topicIndex++;
         }
-        Debug.Log(topicIndex+","+ topicNO.Count+","+ currentQuestions+","+ requstProportion);
 
         //在题库中至少有两个题时才激活下一题切换
         if (topicIndex < topicNO.Count)
@@ -238,11 +234,9 @@ public class TopicLib : MonoBehaviour
         GetTopics();
         SetTopics(topicNO[0]);
 
-        Text txt = Instantiate(Resources.Load<Text>(ConstLib.INTEGRAL_PATH), kownHowMuchCanvas.transform);
+        ToolLib.Tig(kownHowMuchCanvas.transform, ConstLib.KownHowMuchIntegral.ToString());
 
-        txt.text = Convert.ToString(initIntegral);
-
-        ConstLib.Integral += initIntegral;
+        ConstLib.Integral += ConstLib.KownHowMuchIntegral;
         ConstLib.WriteIntegral();
     }
 }

@@ -54,4 +54,16 @@ public class Timer : MonoBehaviour
     {
         this.triggerTimer = triggerTimer;
     }
+
+    public void TimerAdd()
+    { 
+        if (PlayerState.prop.TimeAddNum > 0)
+        {
+            PlayerState.prop.TimeAddNum--;
+            PlayerState.usingTimeAdd = false;
+            PlayerState.SetTimeAddNum();
+            countDownBar.value += ConstLib.TimeAddInterval;
+            ToolLib.Tig(gameObject.transform, "时间已增加10秒");
+        }        
+    }
 }

@@ -15,6 +15,8 @@ public class GameStart : MonoBehaviour
     Canvas mainCanvas;
     Canvas kownHowMuchCanvas;
     Canvas eliminateToLeCanvas;
+    Canvas finshingToLeCanvas;
+    Canvas shopCanvas;
 
     /// <summary>
     /// UI管理
@@ -28,21 +30,29 @@ public class GameStart : MonoBehaviour
 
     void Start()
     {
-        startGameCanvas = GameObject.Find("StartGameCanvas").GetComponent<Canvas>();
+        startGameCanvas = GameObject.Find(ConstLib.STARTGAMECANVAS).GetComponent<Canvas>();
 
-        eliminateToLeCanvas = GameObject.Find("EliminateToLeCanvas").GetComponent<Canvas>();
+        eliminateToLeCanvas = GameObject.Find(ConstLib.ELIMINATETOLECANVAS).GetComponent<Canvas>();
         eliminateToLeCanvas.enabled = false;
 
-        kownHowMuchCanvas = GameObject.Find("KownHowMuchCanvas").GetComponent<Canvas>();
+        kownHowMuchCanvas = GameObject.Find(ConstLib.KOWNHOWMUCHCANVAS).GetComponent<Canvas>();
         kownHowMuchCanvas.enabled = false;
 
-        mainCanvas = GameObject.Find("MainCanvas").GetComponent<Canvas>();
+        finshingToLeCanvas = GameObject.Find(ConstLib.FISHINGTOLECANVAS).GetComponent<Canvas>();
+        finshingToLeCanvas.enabled = false;
 
-        manager = GameObject.Find("CanvasManager").GetComponent<CanvasManager>();
+        shopCanvas = GameObject.Find(ConstLib.SHOPCANVAS).GetComponent<Canvas>();
+        shopCanvas.enabled = false;
 
-        vedio = startGameCanvas.transform.Find("StartVedio").GetComponent<VideoPlayer>();
+        mainCanvas = GameObject.Find(ConstLib.MAINCANVAS).GetComponent<Canvas>();
+        mainCanvas.enabled = false;
 
-        InitIntegral();
+        manager = GameObject.Find(ConstLib.CANVASMANAGER).GetComponent<CanvasManager>();
+
+        vedio = startGameCanvas.transform.Find(ConstLib.STARTVEDIO).GetComponent<VideoPlayer>();
+
+        InitState();
+        PlayerState.InitPropsNum();
     }
 
     void Update()
@@ -50,7 +60,7 @@ public class GameStart : MonoBehaviour
         if (!startGameCanvas.enabled && vedio.isPlaying)
         {
             vedio.Pause();
-            vedio.enabled = false;        
+            vedio.enabled = false;
         }
         if (startGameCanvas.enabled && !vedio.isPlaying)
         {
@@ -70,9 +80,10 @@ public class GameStart : MonoBehaviour
     /// <summary>
     /// 加载以前游戏记录的分数
     /// </summary>
-    void InitIntegral()
+    void InitState()
     {
         string path = Application.streamingAssetsPath + ConstLib.INTEGRAL_FILE_PATH;
         ConstLib.Integral = Convert.ToInt32(File.ReadAllText(path));
+        
     }
 }

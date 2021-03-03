@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class IntrgralDestroy : MonoBehaviour
+public class TigScript : MonoBehaviour
 {
-    float time = 1;
+    public float time = 1;
     void Update()
     {
         if (time >= 0)
